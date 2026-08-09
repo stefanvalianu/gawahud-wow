@@ -1,5 +1,17 @@
-GAWAHUD 0.6.0
+GAWAHUD @project-version@
 =======================
+
+DESCRIPTION
+-----------
+gawaHUD aims to provide a minimal, all-in-one package for improving the baseline World of Warcraft UI with the following base features:
+
+Make the tooltip positioned at the mouse cursor
+Remove the gray grid around the default action bar buttons
+Make it possible to have sensible settings for hiding the vast majority of the UI out of combat, to aid OLED monitor burn-in, reduce visual clutter, and in general make it possible to better appreciate the stylistic beauty of World of Warcraft.
+
+The hiding behavior is configurable to set each set of elements to either be always hidden, hidden in combat, or hidden out of combat. The definition of hidden is configurable as an alpha number from 100 to 0, where 0 would be invisible, 50 would be half-visible, and 75 would be 3/4ths visible. 
+
+Nothing that is hidden is truly gone from the UI, mousing over the position of the element (or group of elements) will reveal them, with an auto-fade back to the configured opacity once the mouse exits. The chat frame is configured to auto-reveal when a new message comes in, then auto fade-out shortly after.
 
 INSTALL OR UPDATE
 -----------------
