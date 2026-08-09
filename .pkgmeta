@@ -1,0 +1,6 @@
+package-as: gawaHUD
+
+enable-nolib-creation: no
+
+ignore:
+  - AGENTS.md

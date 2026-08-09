@@ -2,7 +2,7 @@
 ## Title: gawaHUD
 ## Notes: Minimalist Retail HUD visibility policies, cursor tooltips, and borderless action buttons.
 ## Author: Stefan
-## Version: 0.6.0
+## Version: @project-version@
 ## SavedVariables: gawaHUDDB
 ## IconTexture: Interface\AddOns\gawaHUD\Media\gawaHUD.tga
 
