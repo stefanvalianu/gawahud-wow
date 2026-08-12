@@ -445,9 +445,28 @@ local function IsMouseOverRule(rule)
 
     local hoverFrames = #rule.hoverFrames > 0 and rule.hoverFrames or rule.frames
     for _, frame in ipairs(hoverFrames) do
-        if frame:IsVisible()
-            and MouseIsOver(frame, padding, padding, padding, padding) then
-            return true
+        local visibleOK, visible = pcall(frame.IsVisible, frame)
+        if visibleOK
+            and not (issecretvalue and issecretvalue(visible))
+            and visible
+            and type(frame.IsMouseOver) == "function" then
+            -- Retail 12.1 removed the global MouseIsOver(frame, ...) helper.
+            -- ScriptRegion:IsMouseOver uses top, bottom, left, right offsets;
+            -- expanding the hit rectangle therefore requires negative bottom
+            -- and left offsets.
+            local hoverOK, hovered = pcall(
+                frame.IsMouseOver,
+                frame,
+                padding,
+                -padding,
+                -padding,
+                padding
+            )
+            if hoverOK
+                and not (issecretvalue and issecretvalue(hovered))
+                and hovered then
+                return true
+            end
         end
     end
 
@@ -638,11 +657,30 @@ local function UpdateRule(rule, now)
     ApplyRuleProgress(rule, GetConcealProgress(rule, now))
 end
 
+local function SafeUpdateRule(rule, now)
+    if rule.faulted then
+        return false
+    end
+
+    local ok, err = pcall(UpdateRule, rule, now)
+    if ok then
+        return true
+    end
+
+    -- A single Blizzard frame/API regression must not abort every visibility
+    -- rule on every OnUpdate tick. Disable only the failing rule until settings
+    -- are reapplied (which rebuilds the rule objects) or the UI is reloaded.
+    rule.faulted = true
+    Print(("Visibility rule '%s' disabled after an error: %s. Use /gawahud apply to retry.")
+        :format(rule.id or "unknown", tostring(err)))
+    return false
+end
+
 local function UpdateAllRules()
     RefreshInstanceBehaviorState()
     local now = GetTime()
     for _, rule in ipairs(rules) do
-        UpdateRule(rule, now)
+        SafeUpdateRule(rule, now)
     end
 end
 
@@ -728,7 +766,7 @@ local function RevealChatForNewMessage()
 
     rule.revealUntil = now + hold
     rule.fadeUntil = rule.revealUntil + fade
-    UpdateRule(rule, now)
+    SafeUpdateRule(rule, now)
 end
 
 local function HookChatFrames()
