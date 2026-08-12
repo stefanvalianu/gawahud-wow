@@ -67,7 +67,6 @@ local function SetHealthThresholdEnabled(row, enabled)
 
     row.healthThresholdBox:SetEnabled(enabled)
     row.healthThresholdBox:SetAlpha(enabled and 1 or 0.5)
-
     if row.healthPercent then
         row.healthPercent:SetAlpha(enabled and 1 or 0.5)
     end
@@ -114,7 +113,6 @@ local function CreateModeDropdown(parent, definition)
     )
     dropdown:SetWidth(170)
     dropdown:SetDefaultText("Select behavior")
-
     dropdown:SetupMenu(function(_, rootDescription)
         local saved = ns.GetElementSettings(definition.id)
 
@@ -290,7 +288,6 @@ local function CreateSettingsPanel()
     for index, definition in ipairs(ns.elements or {}) do
         local hasHealthThreshold = type(definition.healthVisibility) == "table"
         local rowHeight = hasHealthThreshold and 88 or 54
-
         local row = CreateFrame("Frame", nil, content)
         row:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -yOffset)
         row:SetPoint("RIGHT", content, "RIGHT", 0, 0)
@@ -368,7 +365,6 @@ function ns.InitializeSettings()
     if initialized then
         return
     end
-
     if not Settings or not Settings.RegisterCanvasLayoutCategory then
         return
     end

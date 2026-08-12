@@ -64,7 +64,7 @@ Every supported UI element has two standard settings:
 
 The combined **Player frame, buffs, and debuffs** row also has an optional low-health override. Enable its checkbox and enter a percentage from `1` through `100` to keep the entire group fully visible whenever player health is at or below that threshold.
 
-The override is disabled by default; its initial threshold is `35%`.
+The override is enabled by default; its initial threshold is `80%`.
 
 Changes are saved immediately to one account-wide profile shared by every Retail character. There are no profile-copy or save buttons.
 
@@ -74,7 +74,7 @@ Existing settings for the old separate main/additional action-bar entries migrat
 
 - Default-position tooltips appear at the cursor.
 - Permanent action-button rims and empty-slot rims are removed.
-- Instance suppression is disabled until explicitly enabled in settings.
+- Instance suppression is enabled by default and can be disabled in settings.
 - Chat is concealed except while hovered or while typing.
 - A newly rendered chat message reveals chat for 8 seconds, after which chat fades to its configured hidden opacity over 2 seconds.
 - All primary and additional action bars share one **Action bars** setting. They are concealed outside combat and reveal on hover.
@@ -176,6 +176,12 @@ The addon uses alpha interpolation instead of replacing Blizzard frame methods o
 See [`AGENTS.md`](AGENTS.md) for the maintenance contract.
 
 ## Changelog
+
+### 0.9.0
+
+- Updated the Retail interface version for World of Warcraft 12.1.0.
+- Replaced the removed global `MouseIsOver(frame, ...)` API with `frame:IsMouseOver(...)`.
+- Added per-rule error isolation so one broken Blizzard frame or API cannot abort the entire visibility engine every update tick.
 
 ### 0.7.0
 
