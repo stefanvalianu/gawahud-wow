@@ -128,7 +128,7 @@ ns.elements = {
     {
         id = "minimap",
         label = "Minimap",
-        description = "The map surface itself. Child buttons created directly on the minimap may inherit its opacity.",
+        description = "Terrain and indoor/cave map tiles. The map stays fully opaque in indoor render modes to avoid Blizzard's black-map alpha bug.",
         group = "minimap",
         defaultMode = "always",
         defaultOpacity = 66,
@@ -137,7 +137,7 @@ ns.elements = {
     {
         id = "minimap-extras",
         label = "Minimap decorations and buttons",
-        description = "Clock, zone title, calendar, tracking, mail, queue, addon-compartment, zoom, and expansion buttons when available.",
+        description = "Compass chrome, clock, zone title, calendar, tracking, mail, queue, addon-compartment, zoom, and expansion buttons when available.",
         group = "minimapExtras",
         defaultMode = "always",
         defaultOpacity = 0,

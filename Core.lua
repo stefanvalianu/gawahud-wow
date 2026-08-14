@@ -978,6 +978,33 @@ local function Audit()
         tostring(instanceBehaviorSuppressed)
     ))
 
+    if type(ns.GetMinimapRendererState) == "function" then
+        local ok, state = pcall(ns.GetMinimapRendererState)
+        if ok and type(state) == "table" then
+            local function FormatKnown(value, known)
+                if known == false then
+                    return "unknown"
+                end
+                return tostring(value == true)
+            end
+
+            Print(("Minimap renderer: alphaUnsafe=%s, outdoors=%s, indoors=%s, hybridRequested=%s, hybridShown=%s, alpha=%s, effectiveAlpha=%s, zoom=%s/%s, uiMapID=%s, mapType=%s, mapName=%s"):format(
+                tostring(state.alphaUnsafe == true),
+                FormatKnown(state.outdoors, state.outdoorsKnown),
+                FormatKnown(state.indoors, state.indoorsKnown),
+                tostring(state.hybridRequested == true),
+                tostring(state.hybridShown == true),
+                tostring(state.alpha),
+                tostring(state.effectiveAlpha),
+                tostring(state.zoom),
+                tostring(state.zoomLevels),
+                tostring(state.uiMapID),
+                tostring(state.mapType),
+                tostring(state.mapName)
+            ))
+        end
+    end
+
     for _, rule in ipairs(rules) do
         ResolveRule(rule)
 
@@ -1034,7 +1061,10 @@ end
 
 controller:RegisterEvent("PLAYER_LOGIN")
 controller:RegisterEvent("PLAYER_ENTERING_WORLD")
+controller:RegisterEvent("ZONE_CHANGED")
+controller:RegisterEvent("ZONE_CHANGED_INDOORS")
 controller:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+controller:RegisterEvent("NEW_WMO_CHUNK")
 controller:RegisterEvent("PLAYER_REGEN_DISABLED")
 controller:RegisterEvent("PLAYER_REGEN_ENABLED")
 controller:RegisterEvent("ADDON_LOADED")
@@ -1054,7 +1084,11 @@ controller:SetScript("OnEvent", function(_, event)
         return
     end
 
-    if event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
+    if event == "PLAYER_ENTERING_WORLD"
+        or event == "ZONE_CHANGED"
+        or event == "ZONE_CHANGED_INDOORS"
+        or event == "ZONE_CHANGED_NEW_AREA"
+        or event == "NEW_WMO_CHUNK" then
         RefreshInstanceBehaviorState()
         ScheduleRefresh()
         InstallActionButtonStyling()
@@ -1096,6 +1130,16 @@ SlashCmdList.GAWAHUD = function(message)
         return
     end
 
+    if command == "maprefresh" then
+        if type(ns.RefreshMinimapRenderer) == "function" then
+            ns.RefreshMinimapRenderer()
+            Print("Minimap renderer refresh requested.")
+        else
+            Print("Minimap renderer refresh is unavailable.")
+        end
+        return
+    end
+
     if command == "disable" or command == "off" then
         addonEnabled = false
         RestoreAllFrames()
@@ -1125,5 +1169,5 @@ SlashCmdList.GAWAHUD = function(message)
         return
     end
 
-    Print("Commands: /gawahud settings, /gawahud audit, /gawahud enable, /gawahud disable, /gawahud apply")
+    Print("Commands: /gawahud settings, /gawahud audit, /gawahud maprefresh, /gawahud enable, /gawahud disable, /gawahud apply")
 end
