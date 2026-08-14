@@ -13,7 +13,6 @@ local MODE_OPTIONS = {
     { value = "inCombat", label = "During combat" },
     { value = "always", label = "Always" },
 }
-
 local function ClampPercent(value, minimum)
     value = tonumber(value) or minimum or 0
     value = math.floor(value + 0.5)
@@ -31,7 +30,6 @@ local function CommitOpacity(row)
     if not saved then
         return
     end
-
     local value = ClampPercent(row.opacityBox:GetText(), 0)
     row.opacityBox:SetText(tostring(value))
 
@@ -48,7 +46,6 @@ local function CommitHealthThreshold(row)
     if not saved or not row.healthThresholdBox then
         return
     end
-
     local value = ClampPercent(row.healthThresholdBox:GetText(), 1)
     row.healthThresholdBox:SetText(tostring(value))
 
@@ -82,7 +79,6 @@ local function RefreshRow(row)
     if row.modeDropdown.GenerateMenu then
         row.modeDropdown:GenerateMenu()
     end
-
     if row.healthCheckbox then
         local enabled = saved.healthThresholdEnabled == true
         row.healthCheckbox:SetChecked(enabled)
@@ -97,7 +93,6 @@ local function RefreshGeneralSettings()
     if not disableInInstancesCheckbox or not ns.GetGeneralSettings then
         return
     end
-
     local saved = ns.GetGeneralSettings()
     disableInInstancesCheckbox:SetChecked(
         saved and saved.disableInInstances == true
@@ -126,7 +121,6 @@ local function CreateModeDropdown(parent, definition)
                 ApplyChange()
             end
         end
-
         for _, option in ipairs(MODE_OPTIONS) do
             rootDescription:CreateRadio(
                 option.label,
@@ -139,7 +133,6 @@ local function CreateModeDropdown(parent, definition)
 
     return dropdown
 end
-
 local function CreateHealthThresholdControls(row)
     local checkbox = CreateFrame(
         "CheckButton",
@@ -150,14 +143,12 @@ local function CreateHealthThresholdControls(row)
     checkbox:SetPoint("TOPLEFT", row, "TOPLEFT", 17, -58)
     checkbox:SetSize(24, 24)
     row.healthCheckbox = checkbox
-
     local label = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     label:SetPoint("LEFT", checkbox, "RIGHT", 3, 0)
     label:SetWidth(275)
     label:SetJustifyH("LEFT")
     label:SetText("Always show when player health is at or below")
     row.healthLabel = label
-
     local thresholdBox = CreateFrame("EditBox", nil, row, "InputBoxTemplate")
     thresholdBox:SetSize(48, 24)
     thresholdBox:SetPoint("LEFT", label, "RIGHT", 8, 0)
@@ -166,7 +157,6 @@ local function CreateHealthThresholdControls(row)
     thresholdBox:SetMaxLetters(3)
     thresholdBox:SetJustifyH("CENTER")
     row.healthThresholdBox = thresholdBox
-
     local percent = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
     percent:SetPoint("LEFT", thresholdBox, "RIGHT", 4, 0)
     percent:SetText("%")
@@ -177,13 +167,11 @@ local function CreateHealthThresholdControls(row)
         if not saved then
             return
         end
-
         local enabled = checkbox:GetChecked() and true or false
         saved.healthThresholdEnabled = enabled
         SetHealthThresholdEnabled(row, enabled)
         ApplyChange()
     end)
-
     thresholdBox:SetScript("OnEnterPressed", function()
         CommitHealthThreshold(row)
     end)
@@ -199,11 +187,9 @@ end
 local function CreateSettingsPanel()
     panel = CreateFrame("Frame")
     panel.name = displayName
-
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", 16, -16)
     title:SetText(displayName)
-
     local subtitle = panel:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
     subtitle:SetPoint("RIGHT", panel, "RIGHT", -30, 0)
@@ -212,7 +198,6 @@ local function CreateSettingsPanel()
         "Settings are saved immediately in one account-wide profile shared by all Retail characters. "
         .. "Hidden opacity is an absolute percentage; 0% is fully invisible."
     )
-
     local instanceRow = CreateFrame("Frame", nil, panel)
     instanceRow:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", -4, -12)
     instanceRow:SetPoint("RIGHT", panel, "RIGHT", -30, 0)
@@ -226,7 +211,6 @@ local function CreateSettingsPanel()
     )
     disableInInstancesCheckbox:SetPoint("TOPLEFT", 0, 0)
     disableInInstancesCheckbox:SetSize(26, 26)
-
     local instanceLabel = instanceRow:CreateFontString(
         nil,
         "ARTWORK",
@@ -234,7 +218,6 @@ local function CreateSettingsPanel()
     )
     instanceLabel:SetPoint("LEFT", disableInInstancesCheckbox, "RIGHT", 3, 1)
     instanceLabel:SetText("Disable addon behavior in instances")
-
     local instanceDescription = instanceRow:CreateFontString(
         nil,
         "ARTWORK",
@@ -246,7 +229,6 @@ local function CreateSettingsPanel()
     instanceDescription:SetText(
         "Use normal frame opacity, Blizzard tooltip anchoring, and action-button artwork in all instanced content."
     )
-
     disableInInstancesCheckbox:SetScript("OnClick", function()
         local saved = ns.GetGeneralSettings and ns.GetGeneralSettings()
         if not saved then
@@ -258,7 +240,6 @@ local function CreateSettingsPanel()
             or false
         ApplyChange()
     end)
-
     local nameHeader = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     nameHeader:SetPoint("TOPLEFT", instanceRow, "BOTTOMLEFT", 8, -14)
     nameHeader:SetText("UI element")
@@ -266,7 +247,6 @@ local function CreateSettingsPanel()
     local modeHeader = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     modeHeader:SetPoint("TOPLEFT", instanceRow, "BOTTOMLEFT", 348, -14)
     modeHeader:SetText("Conceal")
-
     local opacityHeader = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     opacityHeader:SetPoint("TOPLEFT", instanceRow, "BOTTOMLEFT", 543, -14)
     opacityHeader:SetText("Hidden opacity")
@@ -279,7 +259,6 @@ local function CreateSettingsPanel()
     )
     scrollFrame:SetPoint("TOPLEFT", nameHeader, "BOTTOMLEFT", -8, -8)
     scrollFrame:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -30, 14)
-
     local content = CreateFrame("Frame", nil, scrollFrame)
     content:SetWidth(660)
     scrollFrame:SetScrollChild(content)
@@ -299,13 +278,11 @@ local function CreateSettingsPanel()
             background:SetAllPoints()
             background:SetColorTexture(1, 1, 1, 0.025)
         end
-
         local label = row:CreateFontString(nil, "ARTWORK", "GameFontNormal")
         label:SetPoint("TOPLEFT", 4, -8)
         label:SetWidth(320)
         label:SetJustifyH("LEFT")
         label:SetText(definition.label)
-
         local description = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
         description:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -3)
         description:SetWidth(320)
@@ -315,7 +292,6 @@ local function CreateSettingsPanel()
         local dropdown = CreateModeDropdown(row, definition)
         dropdown:SetPoint("TOPLEFT", row, "TOPLEFT", 345, -12)
         row.modeDropdown = dropdown
-
         local opacityBox = CreateFrame("EditBox", nil, row, "InputBoxTemplate")
         opacityBox:SetSize(48, 24)
         opacityBox:SetPoint("TOPLEFT", row, "TOPLEFT", 548, -15)
@@ -324,11 +300,9 @@ local function CreateSettingsPanel()
         opacityBox:SetMaxLetters(3)
         opacityBox:SetJustifyH("CENTER")
         row.opacityBox = opacityBox
-
         local percent = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
         percent:SetPoint("LEFT", opacityBox, "RIGHT", 4, 0)
         percent:SetText("%")
-
         opacityBox:SetScript("OnEnterPressed", function()
             CommitOpacity(row)
         end)
@@ -343,7 +317,6 @@ local function CreateSettingsPanel()
         if hasHealthThreshold then
             CreateHealthThresholdControls(row)
         end
-
         rows[#rows + 1] = row
         yOffset = yOffset + rowHeight + 4
     end
