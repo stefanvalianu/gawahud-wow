@@ -355,6 +355,39 @@ local function IsChatInputActive()
     return editBox ~= nil and editBox:IsShown()
 end
 
+local PLAYER_STATUS_GLOBALS = {
+    "PlayerFrame",
+    "BuffFrame",
+    "DebuffFrame",
+}
+
+local COOLDOWN_VIEWER_GLOBALS = {
+    "EssentialCooldownViewer",
+    "UtilityCooldownViewer",
+    "BuffIconCooldownViewer",
+}
+
+local function PlayerStatusVisuals()
+    return ResolveGlobals(PLAYER_STATUS_GLOBALS)
+end
+
+local function CooldownViewerVisuals()
+    return ResolveGlobals(COOLDOWN_VIEWER_GLOBALS)
+end
+
+local function PlayerAndCooldownHoverFrames()
+    local result, seen = {}, {}
+
+    for _, name in ipairs(PLAYER_STATUS_GLOBALS) do
+        AddGlobal(result, seen, name)
+    end
+    for _, name in ipairs(COOLDOWN_VIEWER_GLOBALS) do
+        AddGlobal(result, seen, name)
+    end
+
+    return result
+end
+
 local function MinimapExtras()
     local result, seen = {}, {}
 
@@ -397,13 +430,15 @@ ns.groups = {
     },
 
     playerStatus = {
-        resolve = function()
-            return ResolveGlobals({
-                "PlayerFrame",
-                "BuffFrame",
-                "DebuffFrame",
-            })
-        end,
+        resolve = PlayerStatusVisuals,
+        -- Hovering either the player panel or any supported Cooldown Viewer
+        -- reveals both logical rules without coupling their conceal settings.
+        resolveHover = PlayerAndCooldownHoverFrames,
+    },
+
+    cooldownViewers = {
+        resolve = CooldownViewerVisuals,
+        resolveHover = PlayerAndCooldownHoverFrames,
     },
 
     targetFrame = {

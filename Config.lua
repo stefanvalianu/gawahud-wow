@@ -63,6 +63,15 @@ ns.elements = {
         },
     },
     {
+        id = "cooldown-viewers",
+        label = "Cooldown manager trackers",
+        description = "Essential Cooldowns, Utility Cooldowns, and Tracked Buffs. Hover-reveals with the player panel.",
+        group = "cooldownViewers",
+        defaultMode = "outOfCombat",
+        defaultOpacity = 0,
+        mouseover = true,
+    },
+    {
         id = "target-frame",
         label = "Target unit frame",
         description = "The current target's unit frame.",
