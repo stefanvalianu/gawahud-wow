@@ -17,8 +17,12 @@ existing UI, not a replacement UI framework.
 - Chat wakes by securely hooking rendered `AddMessage` calls, then fades.
 - Tooltip changes apply only to Blizzard's default tooltip anchor.
 - Action-button styling removes persistent rim/slot art, not state feedback.
-- The instance override restores tracked presentation changes at runtime without
-  mutating per-element policies or requiring a reload.
+- The instance override suppresses only visibility/opacity policies. Cursor tooltip
+  positioning and action-button styling are persistent presentation rules and must
+  remain active in instances. The override never mutates per-element policies and
+  does not require a reload.
+- The player-status and Cooldown Viewer groups keep independent conceal/opacity
+  settings but share one hover-reveal hit set in both directions.
 
 ## Version Maintenance
 

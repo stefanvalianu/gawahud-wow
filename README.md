@@ -45,9 +45,9 @@ or enter:
 /gawahud settings
 ```
 
-The top-level **Disable addon behavior in instances** checkbox suspends the addon's presentation changes whenever the player is in instanced content. This includes dungeons and Mythic+, raids, scenarios, arenas, and battlegrounds.
+The top-level **Disable hiding/opacity behavior in instances** checkbox suspends only gawaHUD's visibility policies whenever the player is in instanced content. This includes dungeons and Mythic+, raids, scenarios, arenas, and battlegrounds.
 
-While active, managed frames use their normal alpha, default tooltips keep Blizzard's anchor, and action-button artwork is restored. Existing settings are not changed and resume automatically after leaving the instance.
+While active, managed frames use their normal alpha. Cursor-positioned default tooltips and action-button rim/slot-art removal remain active because they are persistent stylistic behavior, not visibility behavior. Existing per-element settings are not changed and resume automatically after leaving the instance.
 
 Every supported UI element has two standard settings:
 
@@ -74,7 +74,7 @@ Existing settings for the old separate main/additional action-bar entries migrat
 
 * Default-position tooltips appear at the cursor.
 * Permanent action-button rims and empty-slot rims are removed.
-* Instance suppression is enabled by default and can be disabled in settings.
+* Instance visibility suppression is enabled by default and can be disabled in settings; it affects only hiding/opacity behavior, never tooltip positioning or action-button styling.
 * Chat is concealed except while hovered or while typing.
 * A newly rendered chat message reveals chat for 8 seconds, after which chat fades to its configured hidden opacity over 2 seconds.
 * All primary and additional action bars share one **Action bars** setting. They are concealed outside combat and reveal on hover.
@@ -82,6 +82,7 @@ Existing settings for the old separate main/additional action-bar entries migrat
 * Bag and micro-menu bars are concealed and reveal on hover.
 * The minimap, its extra controls—including the clock—and the objective tracker are concealed in combat and reveal on hover.
 * The player frame, buffs, and debuffs share one visibility policy and reveal together when any member of the group is hovered.
+* Essential Cooldowns, Utility Cooldowns, and Tracked Buffs are managed by a separate **Cooldown manager trackers** setting and are concealed outside combat by default. Hovering either the player panel or any of these Cooldown Viewer frames reveals both groups, while their conceal modes and hidden opacities remain independent.
 * The combined player group, target, focus, and pet frames are visible by default until configured otherwise.
 * The optional low-health override keeps the combined player group visible at or below its configured health percentage, regardless of conceal behavior.
 * Every managed element becomes visible immediately when its reveal condition applies and fades to its hidden opacity when concealment resumes.
@@ -110,7 +111,7 @@ chatNotifications = {
 
 The override uses WoW's current instance state rather than maintaining a list of dungeon, raid, or PvP map IDs. It therefore also applies to other content reported by the game as instanced.
 
-Entering an instance restores tracked UI state immediately. Leaving one reapplies the saved policies and normal fades.
+Entering an instance restores managed frame alpha immediately and pauses conceal/fade logic. It does **not** disable cursor tooltip positioning or action-button styling. Leaving the instance reapplies the saved visibility policies and normal fades.
 
 ## Minimap Limitation
 
@@ -173,4 +174,6 @@ Short alias:
 ## Design Notes
 
 The addon uses alpha interpolation instead of replacing Blizzard frame methods or forcing protected frames shown or hidden. Visibility checks run at 20 Hz and only write alpha while a frame's effective opacity is changing.
+
+A core design goal is to separate **visibility policy** from **persistent styling**. The instance override may suspend concealment and opacity changes, but it must not suspend cursor tooltip positioning or action-button artwork cleanup.
 

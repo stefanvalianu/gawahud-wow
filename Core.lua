@@ -12,7 +12,7 @@ local addonEnabled = true
 local refreshScheduled = false
 local tooltipHookInstalled = false
 local actionButtonHookInstalled = false
-local instanceBehaviorSuppressed = false
+local instanceVisibilitySuppressed = false
 
 local VALID_HIDE_MODES = {
     never = true,
@@ -181,7 +181,7 @@ local function MigrateDatabase(database)
     elements["additional-action-bars"] = nil
     elements["player-frame"] = nil
     elements.buffs = nil
-    database.version = 4
+    database.version = 5
 end
 
 local function InitializeDatabase()
@@ -247,7 +247,7 @@ function ns.GetElementSettings(id)
     return elements and elements[id] or nil
 end
 
-local function RefreshInstanceBehaviorState()
+local function RefreshInstanceVisibilityState()
     local suppressed = false
     if ns.db and ns.db.disableInInstances == true
         and type(IsInInstance) == "function" then
@@ -255,8 +255,8 @@ local function RefreshInstanceBehaviorState()
         suppressed = ok and inInstance == true
     end
 
-    local changed = instanceBehaviorSuppressed ~= suppressed
-    instanceBehaviorSuppressed = suppressed
+    local changed = instanceVisibilitySuppressed ~= suppressed
+    instanceVisibilitySuppressed = suppressed
     return changed
 end
 
@@ -417,7 +417,7 @@ local function IsRuleForcedVisible(rule)
 end
 
 local function ShouldConceal(rule)
-    if not addonEnabled or instanceBehaviorSuppressed then
+    if not addonEnabled or instanceVisibilitySuppressed then
         return false
     end
 
@@ -486,7 +486,7 @@ end
 local function GetConcealProgress(rule, now)
     if not ShouldConceal(rule) then
         rule.lastMouseOver = nil
-        if instanceBehaviorSuppressed then
+        if instanceVisibilitySuppressed then
             CancelTimedReveal(rule)
         end
         ResetConcealFade(rule)
@@ -677,7 +677,7 @@ local function SafeUpdateRule(rule, now)
 end
 
 local function UpdateAllRules()
-    RefreshInstanceBehaviorState()
+    RefreshInstanceVisibilityState()
     local now = GetTime()
     for _, rule in ipairs(rules) do
         SafeUpdateRule(rule, now)
@@ -826,22 +826,6 @@ local function HideActionArtwork(region)
     tracked.applied = true
 end
 
-local function RestoreActionArtwork(region)
-    local tracked = trackedActionArtwork[region]
-    if not tracked or not tracked.applied then
-        return
-    end
-
-    region:SetAlpha(tracked.originalAlpha)
-    tracked.applied = false
-end
-
-local function RestoreAllActionArtwork()
-    for region in pairs(trackedActionArtwork) do
-        RestoreActionArtwork(region)
-    end
-end
-
 local function StripActionButtonArtwork(button)
     local config = ns.config and ns.config.actionButtons
     if not config or config.enabled == false or not button then
@@ -856,11 +840,9 @@ local function StripActionButtonArtwork(button)
             return
         end
 
-        if instanceBehaviorSuppressed then
-            RestoreActionArtwork(region)
-        else
-            HideActionArtwork(region)
-        end
+        -- Instance suppression applies only to visibility/opacity policies.
+        -- Stylistic action-button cleanup remains active everywhere.
+        HideActionArtwork(region)
     end
 
     ApplyRegion(normalTexture, config.removeNormalTexture)
@@ -893,12 +875,6 @@ local function ScanNamedActionButtons()
 end
 
 local function InstallActionButtonStyling()
-    RefreshInstanceBehaviorState()
-
-    if instanceBehaviorSuppressed then
-        RestoreAllActionArtwork()
-    end
-
     if actionButtonHookInstalled then
         ScanNamedActionButtons()
         return
@@ -939,10 +915,10 @@ local function InstallTooltipHook()
     end
 
     hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-        RefreshInstanceBehaviorState()
         local current = ns.config and ns.config.tooltip
-        if current and current.enabled ~= false
-            and not instanceBehaviorSuppressed then
+        if current and current.enabled ~= false then
+            -- Tooltip positioning is stylistic and intentionally remains active
+            -- even when visibility policies are disabled inside instances.
             tooltip:SetOwner(parent or UIParent, current.anchor or "ANCHOR_CURSOR_RIGHT")
         end
     end)
@@ -951,16 +927,15 @@ local function InstallTooltipHook()
 end
 
 function ns.ApplySettings()
-    RefreshInstanceBehaviorState()
+    RefreshInstanceVisibilityState()
     BuildRules()
     RefreshRules()
     HookChatFrames()
     UpdateAllRules()
     InstallActionButtonStyling()
 
-    if instanceBehaviorSuppressed then
+    if instanceVisibilitySuppressed then
         RestoreAllFrames()
-        RestoreAllActionArtwork()
     end
 end
 
@@ -972,10 +947,10 @@ local function Audit()
         tostring(interfaceVersion)
     ))
 
-    RefreshInstanceBehaviorState()
-    Print(("Instance override: configured=%s, active=%s"):format(
+    RefreshInstanceVisibilityState()
+    Print(("Instance visibility override: configured=%s, active=%s"):format(
         tostring(ns.db and ns.db.disableInInstances == true),
-        tostring(instanceBehaviorSuppressed)
+        tostring(instanceVisibilitySuppressed)
     ))
 
     if type(ns.GetMinimapRendererState) == "function" then
@@ -1089,7 +1064,7 @@ controller:SetScript("OnEvent", function(_, event)
         or event == "ZONE_CHANGED_INDOORS"
         or event == "ZONE_CHANGED_NEW_AREA"
         or event == "NEW_WMO_CHUNK" then
-        RefreshInstanceBehaviorState()
+        RefreshInstanceVisibilityState()
         ScheduleRefresh()
         InstallActionButtonStyling()
         return
